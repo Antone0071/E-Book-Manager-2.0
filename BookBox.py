@@ -1,16 +1,78 @@
-from PIL import Image
-from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QVBoxLayout, QHBoxLayout, QPushButton, QStackedWidget, QListWidget, QListWidgetItem
+import os
+from PyQt5 import QtWidgets
+from PyQt5.QtWidgets import QWidget, QLabel, QVBoxLayout, QMessageBox
 from PyQt5.QtGui import QPixmap, QFont, QPainter, QPen, QFontMetrics
-from PyQt5.QtCore import Qt, QSize, QRect
+from PyQt5.QtCore import Qt, QRect
+
+from BookRedactionWidget import BookRedactionWidget
 
 
 class BookBox(QWidget):
-    def __init__(self, book, box_min_size=(200, 250), max_width=300):
+    def __init__(self, app, book):
         super().__init__()
+        self.bookRedactionWidget = None
         self.book = book
-        self.box_min_size = box_min_size
-        self.max_width = max_width
+        self.app = app
+        self.box_min_size = (200, 250)
+        self.max_width = 300
         self.init_ui()
+        self.contextMenu = QtWidgets.QMenu(self)
+        self.contextMenu.setStyleSheet("""
+            QMenu {
+                background-color: white; 
+                color: black; 
+                border: 1px solid lightgray;
+            }
+            QMenu::item {
+                background-color: transparent;
+            }
+            QMenu::item:selected { 
+                background-color: #add8e6; /* Голубой */
+                color: black; 
+            }
+        """)
+
+        self.openAction = QtWidgets.QAction("Открыть", self)
+        self.contextMenu.addAction(self.openAction)
+
+        self.addInCollectionAction = QtWidgets.QAction("Добавить в...", self)
+        self.contextMenu.addAction(self.addInCollectionAction)
+
+        self.redactAction = QtWidgets.QAction("Редактировать информацию", self)
+        self.contextMenu.addAction(self.redactAction)
+
+        self.deleteAction = QtWidgets.QAction("Удалить книгу", self)
+        self.contextMenu.addAction(self.deleteAction)
+
+        self.redactAction.triggered.connect(self.redact_action_activation)
+        self.deleteAction.triggered.connect(self.delete_action_activation)
+        self.openAction.triggered.connect(self.open_action_activation)
+
+    def open_action_activation(self):
+        pass
+
+    def redact_action_activation(self):
+        if self.bookRedactionWidget is not None:
+            self.bookRedactionWidget.close()
+            self.bookRedactionWidget.deleteLater()
+        self.bookRedactionWidget = BookRedactionWidget(self.book, self.app)
+        self.bookRedactionWidget.show()
+
+    def delete_action_activation(self):
+        self.asking = QMessageBox()
+        self.asking.setText(f"Вы уверены, что хотите удалить '{self.book.title}'?")
+        self.asking.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+        self.asking.setDefaultButton(QMessageBox.No)
+        self.asking.setWindowTitle("Судьба книги")
+
+        result = self.asking.exec_()
+
+        if result == QMessageBox.Yes:
+            os.remove(self.book.file_path)
+            self.app.restart_activation()
+
+    def contextMenuEvent(self, event):
+        self.contextMenu.exec_(event.globalPos())
 
     def init_ui(self):
         self.setFixedSize(*self.box_min_size)
@@ -66,6 +128,8 @@ class BookBox(QWidget):
     def mousePressEvent(self, e):
         if e.button() == Qt.LeftButton:
             print(f"Title: {self.book.title}")
+        #elif e.button() == Qt.RightButton:
+
 
     def paintEvent(self, event):
         painter = QPainter(self)

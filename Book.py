@@ -1,7 +1,6 @@
 import os
 import zipfile
 import xml.etree.ElementTree as ET
-import shutil
 import base64
 
 
@@ -11,7 +10,8 @@ class Book:
         self.file_path = file_path
         self.author = "Неизвестно"
         self.title = "Неизвестно"
-        self.cover = "default-book-cover.png"
+        self.cover = "icons/default-book-cover.png"
+        self.genre = "Неизвестно"
         self.flag = False
         self.parse_file(file_path)
 
@@ -30,8 +30,13 @@ class Book:
                         ns = {'dc': 'http://purl.org/dc/elements/1.1/'}
                         author = root.find('.//dc:creator', ns).text
                         title = root.find('.//dc:title', ns).text
+                        try:
+                            self.genre = root.find('.//dc:subject', ns).text
+                        except Exception:
+                            pass
                         self.author = author
                         self.title = title
+
                 if file.endswith(".jpg") or file.endswith(".jpeg") or file.endswith(".png"):
                     self.flag = True
                     self.cover = epub.read(file)
@@ -39,12 +44,35 @@ class Book:
     def parse_fb2(self, file_path):
         tree = ET.parse(file_path)
         root = tree.getroot()
-        # fb2 обычно использует пространство имен для метаданных
         ns = {'fb2': 'http://www.gribuser.ru/xml/fictionbook/2.0'}
+
         author_element = root.find('.//fb2:author', ns)
-        author = " ".join([name_part.text for name_part in author_element.findall('./fb2:first-name', ns)] +
-                          [name_part.text for name_part in author_element.findall('./fb2:last-name', ns)])
-        title = root.find('.//fb2:book-title', ns).text
+        if author_element is not None:
+            first_name = author_element.find('./fb2:first-name', ns)
+            last_name = author_element.find('./fb2:last-name', ns)
+
+            full_name = ""
+            if first_name is not None and first_name.text:
+                full_name += first_name.text
+            if last_name is not None and last_name.text:
+                full_name += " " + last_name.text
+
+            # Перенос полного имени в first-name
+            if first_name is not None:
+                first_name.text = full_name
+            if last_name is not None:
+                last_name.clear()  # Очистка last-name
+
+            self.author = full_name
+
+        title = root.find('.//fb2:book-title', ns)
+        if title is not None:
+            self.title = title.text
+
+        genre = root.find('.//fb2:genre', ns)
+        if genre is not None:
+            self.genre = genre.text
+
         cover_page = root.find(".//fb2:coverpage/fb2:image", namespaces=ns)
         if not cover_page:
             cover_id = cover_page.attrib['{http://www.w3.org/1999/xlink}href'].lstrip('#')
@@ -52,8 +80,6 @@ class Book:
             cover_data = base64.b64decode(binary_element.text)
             self.flag = True
             self.cover = cover_data
-        self.author = author
-        self.title = title
 
     def parse_file(self, file_path):
         _, extension = os.path.splitext(file_path)

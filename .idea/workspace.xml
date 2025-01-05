@@ -4,21 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ec7f1f27-788a-49e1-b230-d099a707313c" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/E-Book-Manager-2.0.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Book.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/BookBox.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/FullscreenApp.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Reader.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/SettingsWindow.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/default-book-cover.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/Antichnaya literatura. Apologiya Sokrata - BooksCafe.Net.epub" afterDir="false" />
+    <list default="true" id="ec7f1f27-788a-49e1-b230-d099a707313c" name="Changes" comment="0.01">
+      <change afterPath="$PROJECT_DIR$/BookAdderBox.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/BookRedactionWidget.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/icons/default-book-cover.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/icons/restart.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/icons/settings.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/storage/Blok, Aleksandr - Stihi o Prekrasnoj Dame.epub" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/storage/Chehov, Anton - Chajka.epub" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/storage/Chehov, Anton - Tri sestry.epub" afterDir="false" />
@@ -26,10 +17,22 @@
       <change afterPath="$PROJECT_DIR$/storage/Chekhov, Anton - Kashtanka.epub" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/storage/Chelovek_V_Visokom_Zamke.epub" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/storage/Dostoevskij, Fedor - Idiot.epub" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/Melori_Smert-Artura.epub" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/storage/Gosudar.fb2" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/storage/Hamlet.fb2" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/storage/KKing_Romany-Stivena-Kinga_2_Zhrebiy-Salema.357208.fb2.epub" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/storage/Karamzin, Nikolay - Bednaya Liza.epub" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/storage/Kelskie_mifi.fb2" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/storage/King_-Tyomnaya-Bashnya-_6_Pesn-Syuzanny.543919.fb2.epub" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/storage/King_Denni-Torrans_1_Siyanie.217179.fb2.epub" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/storage/King_King-Stiven-Romany_23_Beznadega.397174.fb2.epub" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/storage/Nizshe.fb2" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/storage/TGoT.fb2" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/storage/mrak.fb2" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Book.py" beforeDir="false" afterPath="$PROJECT_DIR$/Book.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BookBox.py" beforeDir="false" afterPath="$PROJECT_DIR$/BookBox.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FullscreenApp.py" beforeDir="false" afterPath="$PROJECT_DIR$/FullscreenApp.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/default-book-cover.png" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -61,10 +64,13 @@
   &quot;keyToString&quot;: {
     &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
     &quot;Python.Book.executor&quot;: &quot;Run&quot;,
+    &quot;Python.BookAdderBox.executor&quot;: &quot;Run&quot;,
+    &quot;Python.BookBox.executor&quot;: &quot;Run&quot;,
     &quot;Python.BookList.executor&quot;: &quot;Run&quot;,
     &quot;Python.FullscreenApp.executor&quot;: &quot;Run&quot;,
     &quot;Python.main.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;
   }
 }</component>
   <component name="RunManager" selected="Python.main">
@@ -181,6 +187,15 @@
       <option name="presentableId" value="Default" />
       <updated>1729669604027</updated>
     </task>
+    <task id="LOCAL-00001" summary="0.01">
+      <option name="closed" value="true" />
+      <created>1735764514749</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1735764514749</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -208,5 +223,7 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
+    <MESSAGE value="0.01" />
+    <option name="LAST_COMMIT_MESSAGE" value="0.01" />
   </component>
 </project>

@@ -1,12 +1,19 @@
-from PyQt5.QtWidgets import QGridLayout, QScrollArea, QLineEdit, QFormLayout
+import PyQt5.QtWidgets
+from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import QGridLayout, QScrollArea, QMessageBox, QLineEdit, QFormLayout, QHBoxLayout, QPushButton, QStackedWidget, QListWidget, QListWidgetItem
 import BookBox
 from Book import *
+from BookAdderBox import BookAdderBox
 from BookBox import *
+from SettingsWindow import SettingsWindow
 
 
 def list_creation():
     """Перебор файлов в storage, обработка через Book, создание списка и возврат"""
     book_list = []
+
+    if not os.path.isdir("storage"):
+        os.mkdir("storage")
     try:
         for item in os.listdir("storage"):
             item_path = os.path.join("storage", item)
@@ -21,11 +28,11 @@ def list_creation():
 class FullScreenApp(QWidget):
     def __init__(self):
         super().__init__()
-        self.previous_width = self.width()
         self.setWindowTitle("Book Library")
         #self.move(450, 100)
         #self.setFixedSize(980, 890)
         self.setGeometry(250, 100, 1405, 890)
+        self.setWindowIcon(QIcon("icons/default-book-cover.png"))
         self.columns = 6
         self.book_list = list_creation()
 
@@ -36,7 +43,7 @@ class FullScreenApp(QWidget):
         sidebar = QListWidget()
         sidebar.setFixedWidth(150)
         sidebar.addItem(QListWidgetItem("Library"))
-        sidebar.addItem(QListWidgetItem("Settings"))
+
         sidebar.currentRowChanged.connect(self.display_tab)
 
         # Stacked widget for pages
@@ -53,22 +60,31 @@ class FullScreenApp(QWidget):
         scroll_area.setWidget(library_page)
         self.pages.addWidget(scroll_area)
 
-        # Settings tab (empty for now)
-        settings_page = QWidget()
-        settings_layout = QFormLayout(settings_page)
-        settings_layout.addWidget(QLabel("Settings Page"))
-        self.pages.addWidget(settings_page)
+        settings_button = QPushButton()
+        settings_button.setIcon(QIcon("icons/settings.png"))
+        settings_button.clicked.connect(self.settings_activation)
+        settings_button.setFixedWidth(sidebar.width()//2 - 5)
 
-        column_settings_line_edit = QLineEdit()
-        column_settings_line_edit.setText(str(self.columns))
+        restart_button = QPushButton()
+        restart_button.setIcon(QIcon("icons/restart.png"))
+        restart_button.clicked.connect(self.restart_activation)
+        restart_button.setFixedWidth(sidebar.width()//2 - 5)
 
-        column_settings_label = QLabel("Max count of book per row: ")
-
-        settings_layout.addRow(column_settings_label, column_settings_line_edit)
+        sideboard = QVBoxLayout()
+        down_sideboard = QHBoxLayout()
+        sideboard.addWidget(sidebar)
+        down_sideboard.addWidget(settings_button)
+        down_sideboard.addWidget(restart_button)
+        sideboard.addLayout(down_sideboard)
 
         # Add sidebar and pages to main layout
-        main_layout.addWidget(sidebar)
+        main_layout.addLayout(sideboard)
         main_layout.addWidget(self.pages)
+
+    def restart_activation(self):
+        self.book_list = list_creation()
+        self.clear_library_layout()
+        self.populate_grid()
 
     def display_tab(self, index):
         self.pages.setCurrentIndex(index)
@@ -76,12 +92,15 @@ class FullScreenApp(QWidget):
     def show_book_quantity(self):
         return len(self.book_list)
 
+    def settings_activation(self):
+        self.settingsWindow = SettingsWindow()
+        self.settingsWindow.show()
+
     def resizeEvent(self, event):
         """Обработчик обновления окна"""
         super().resizeEvent(event)
         self.get_columns()
         new_columns = self.columns
-        self.clear_library_layout()
         if new_columns != self.columns:
             self.columns = new_columns
             self.populate_grid()
@@ -96,29 +115,35 @@ class FullScreenApp(QWidget):
 
     def stretch_grid(self):
         """Заполняет сетку виджетами на основе текущего размера окна."""
+        self.clear_library_layout()
         self.get_columns()
         cols = self.columns
         row = col = 0
         for book in self.book_list:
-            book_box = BookBox(book)
+            book_box = BookBox(self, book)
             self.library_layout.addWidget(book_box, row, col)
             col += 1
             if col >= cols:
                 col = 0
                 row += 1
+        adder_box = BookAdderBox(self)
+        self.library_layout.addWidget(adder_box, row, col)
 
     def populate_grid(self):
         """Заполняет сетку виджетами на основе текущего размера окна."""
         # Размещаем виджеты в сетке
+        self.clear_library_layout()
         cols = self.columns
         row = col = 0
         for book in self.book_list:
-            book_box = BookBox(book)
+            book_box = BookBox(self, book)
             self.library_layout.addWidget(book_box, row, col)
             col += 1
             if col >= cols:
                 col = 0
                 row += 1
+        adder_box = BookAdderBox(self)
+        self.library_layout.addWidget(adder_box, row, col)
 
     def get_columns(self):
         self.columns = max(2, self.width() // 220 - 1)
