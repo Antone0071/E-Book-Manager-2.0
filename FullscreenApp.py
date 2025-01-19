@@ -1,149 +1,198 @@
-import PyQt5.QtWidgets
-from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QGridLayout, QScrollArea, QMessageBox, QLineEdit, QFormLayout, QHBoxLayout, QPushButton, QStackedWidget, QListWidget, QListWidgetItem
-import BookBox
-from Book import *
+import os
+import shutil
+from pathlib import Path
+from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QPushButton, QGridLayout, QLabel, QScrollArea, QHBoxLayout,
+                             QTreeWidget,
+                             QTreeWidgetItem, QMessageBox, QStackedWidget, QCheckBox)
+from PyQt5.QtGui import QPixmap, QFont, QIcon
+from PyQt5.QtCore import Qt
+from BookBox import BookBox
+from Book import Book
 from BookAdderBox import BookAdderBox
-from BookBox import *
+from CollectionAdder import CollectionAdder
 from SettingsWindow import SettingsWindow
 
 
-def list_creation():
-    """Перебор файлов в storage, обработка через Book, создание списка и возврат"""
-    book_list = []
-
-    if not os.path.isdir("storage"):
-        os.mkdir("storage")
-    try:
-        for item in os.listdir("storage"):
-            item_path = os.path.join("storage", item)
+def list_creation(dir_path, flag=True):
+    """Создаем список книг или коллекций."""
+    listed = []
+    if not os.path.isdir(dir_path):
+        os.mkdir(dir_path)
+    if flag:
+        for item in os.listdir(dir_path):
+            item_path = os.path.join(dir_path, item)
             if item_path.endswith(".epub") or item_path.endswith(".fb2"):
                 book = Book(item_path)
-                book_list.append(book)
-    except FileNotFoundError:
-        print("Error: 'storage' directory not found.")
-    return book_list
+                listed.append(book)
+    else:
+        for item in Path(dir_path).iterdir():
+            if item.is_dir():
+                listed.append(item.name)
+    return listed
 
 
 class FullScreenApp(QWidget):
     def __init__(self):
         super().__init__()
+        self.collection_adder = None
         self.setWindowTitle("Book Library")
-        #self.move(450, 100)
-        #self.setFixedSize(980, 890)
         self.setGeometry(250, 100, 1405, 890)
         self.setWindowIcon(QIcon("icons/default-book-cover.png"))
         self.columns = 6
-        self.book_list = list_creation()
-
-        # Main layout
-        main_layout = QHBoxLayout(self)
-
-        # Sidebar menu
-        sidebar = QListWidget()
-        sidebar.setFixedWidth(150)
-        sidebar.addItem(QListWidgetItem("Library"))
-
-        sidebar.currentRowChanged.connect(self.display_tab)
-
-        # Stacked widget for pages
+        self.book_list_cache = []
+        self.collection_pages = {}
+        self.sidebar = QTreeWidget()
+        self.library_layout = QGridLayout()
         self.pages = QStackedWidget()
 
-        # Library tab
-        library_page = QWidget()
-        self.library_layout = QGridLayout(library_page)
-        self.setLayout(self.library_layout)
+        self.book_list = self.get_books()
+        self.collection_list = list_creation("collections", flag=False)
+
+        main_layout = QHBoxLayout(self)
+        self.setup_sidebar()
+
+        self.library_page = QWidget()
+        self.library_layout = QGridLayout()
+        self.library_page.setLayout(self.library_layout)
         self.populate_grid()
 
         scroll_area = QScrollArea()
         scroll_area.setWidgetResizable(True)
-        scroll_area.setWidget(library_page)
+        scroll_area.setWidget(self.library_page)
         self.pages.addWidget(scroll_area)
+
+        for collection in self.collection_list:
+            self.create_collection_page(collection)
+
+        collection_adder_button = QPushButton()
+        collection_adder_button.setIcon(QIcon("icons/new-collection-adder.png"))
+        collection_adder_button.clicked.connect(self.collection_adder_activation)
 
         settings_button = QPushButton()
         settings_button.setIcon(QIcon("icons/settings.png"))
         settings_button.clicked.connect(self.settings_activation)
-        settings_button.setFixedWidth(sidebar.width()//2 - 5)
 
         restart_button = QPushButton()
         restart_button.setIcon(QIcon("icons/restart.png"))
         restart_button.clicked.connect(self.restart_activation)
-        restart_button.setFixedWidth(sidebar.width()//2 - 5)
 
         sideboard = QVBoxLayout()
         down_sideboard = QHBoxLayout()
-        sideboard.addWidget(sidebar)
+        sideboard.addWidget(self.sidebar)
+        sideboard.addWidget(collection_adder_button)
         down_sideboard.addWidget(settings_button)
         down_sideboard.addWidget(restart_button)
         sideboard.addLayout(down_sideboard)
 
-        # Add sidebar and pages to main layout
         main_layout.addLayout(sideboard)
         main_layout.addWidget(self.pages)
 
+    def get_books(self):
+        if not self.book_list_cache:
+            self.book_list_cache = list_creation("storage")
+        return self.book_list_cache
+
+    def setup_sidebar(self):
+        self.sidebar.setHeaderHidden(True)
+        self.sidebar.setFixedWidth(150)
+        self.sidebar.itemClicked.connect(self.sidebar_item_clicked)
+        self.populate_sidebar()
+
+    def populate_sidebar(self):
+        self.sidebar.clear()
+        library_item = QTreeWidgetItem(["Библиотека"])
+        self.sidebar.addTopLevelItem(library_item)
+        collection_group = QTreeWidgetItem(["Коллекции"])
+        for collection in self.collection_list:
+            collection_item = QTreeWidgetItem([collection])
+            collection_group.addChild(collection_item)
+        self.sidebar.addTopLevelItem(collection_group)
+
+    def create_collection_page(self, collection_name):
+        if collection_name in self.collection_pages:
+            return
+        collection_page = QWidget()
+        collection_layout = QGridLayout()
+        collection_page.setLayout(collection_layout)
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setWidget(collection_page)
+        self.pages.addWidget(scroll_area)
+        self.collection_pages[collection_name] = self.pages.count() - 1
+        self.populate_collection_grid(collection_layout, collection_name)
+
+    def populate_collection_grid(self, layout, collection_name):
+        # Удаляем все существующие виджеты из макета
+        while layout.count():
+            item = layout.takeAt(0)
+            widget = item.widget()
+            if widget is not None:
+                widget.deleteLater()
+
+        # Добавляем новые книги в коллекцию
+        collection_path = os.path.join("collections", collection_name)
+        books = list_creation(collection_path)
+        cols = self.columns
+        row = col = 0
+
+        for book in books:
+            book_box = BookBox(self, book)
+            layout.addWidget(book_box, row, col)
+            col += 1
+            if col >= cols:
+                col = 0
+                row += 1
+
     def restart_activation(self):
-        self.book_list = list_creation()
+        self.book_list_cache = []
+        self.book_list = self.get_books()
+        self.collection_list = list_creation("collections", flag=False)
         self.clear_library_layout()
         self.populate_grid()
+        self.populate_sidebar()
 
-    def display_tab(self, index):
-        self.pages.setCurrentIndex(index)
+        # Перезапуск всех страниц коллекций
+        self.collection_pages.clear()
+        for collection in self.collection_list:
+            self.create_collection_page(collection)
 
-    def show_book_quantity(self):
-        return len(self.book_list)
+    def clear_library_layout(self):
+        for i in reversed(range(self.library_layout.count())):
+            widget = self.library_layout.itemAt(i).widget()
+            if widget:
+                self.library_layout.removeWidget(widget)
+                widget.deleteLater()
+
+    def populate_grid(self):
+        self.clear_library_layout()
+        cols = self.columns
+        row = col = 0
+        for book in self.book_list:
+            book_box = BookBox(self, book)
+            self.library_layout.addWidget(book_box, row, col)
+            col += 1
+            if col >= cols:
+                col = 0
+                row += 1
+        adder_box = BookAdderBox(self)
+        self.library_layout.addWidget(adder_box, row, col)
+
+    def sidebar_item_clicked(self, item, column):
+        if item.parent() is None:
+            if item.text(0) == "Библиотека":
+                self.pages.setCurrentWidget(self.pages.widget(0))
+        else:
+            collection_name = item.text(0)
+            if collection_name in self.collection_pages:
+                self.pages.setCurrentIndex(self.collection_pages[collection_name])
+
+    def collection_adder_activation(self):
+        if self.collection_adder is not None:
+            self.collection_adder.close()
+            self.collection_adder.deleteLater()
+        self.collection_adder = CollectionAdder(self)
+        self.collection_adder.show()
 
     def settings_activation(self):
         self.settingsWindow = SettingsWindow()
         self.settingsWindow.show()
-
-    def resizeEvent(self, event):
-        """Обработчик обновления окна"""
-        super().resizeEvent(event)
-        self.get_columns()
-        new_columns = self.columns
-        if new_columns != self.columns:
-            self.columns = new_columns
-            self.populate_grid()
-        else:
-            self.stretch_grid()
-
-    def clear_library_layout(self):
-        for i in reversed(range(self.library_layout.count())):
-            box = self.library_layout.itemAt(i).widget()
-            if box:
-                self.library_layout.removeWidget(box)
-
-    def stretch_grid(self):
-        """Заполняет сетку виджетами на основе текущего размера окна."""
-        self.clear_library_layout()
-        self.get_columns()
-        cols = self.columns
-        row = col = 0
-        for book in self.book_list:
-            book_box = BookBox(self, book)
-            self.library_layout.addWidget(book_box, row, col)
-            col += 1
-            if col >= cols:
-                col = 0
-                row += 1
-        adder_box = BookAdderBox(self)
-        self.library_layout.addWidget(adder_box, row, col)
-
-    def populate_grid(self):
-        """Заполняет сетку виджетами на основе текущего размера окна."""
-        # Размещаем виджеты в сетке
-        self.clear_library_layout()
-        cols = self.columns
-        row = col = 0
-        for book in self.book_list:
-            book_box = BookBox(self, book)
-            self.library_layout.addWidget(book_box, row, col)
-            col += 1
-            if col >= cols:
-                col = 0
-                row += 1
-        adder_box = BookAdderBox(self)
-        self.library_layout.addWidget(adder_box, row, col)
-
-    def get_columns(self):
-        self.columns = max(2, self.width() // 220 - 1)

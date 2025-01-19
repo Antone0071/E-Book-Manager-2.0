@@ -12,6 +12,7 @@ class BookAdderBox(QWidget):
         super().__init__()
         self.box_min_size = (200, 250)
         self.app = app
+        self.flag = False
         self.max_width = 300
         self.init_ui()
 
@@ -19,7 +20,6 @@ class BookAdderBox(QWidget):
         self.setFixedSize(*self.box_min_size)
         self.setStyleSheet("background: transparent;")
 
-        # Create layout for BookBox
         layout = QVBoxLayout(self)
         layout.setContentsMargins(10, 10, 10, 10)
         layout.setSpacing(5)
@@ -33,7 +33,6 @@ class BookAdderBox(QWidget):
         cover_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(cover_label)
 
-        # Add title label
         title_label = QLabel("Добавить ещё книг", self)
         title_label.setFont(QFont("Arial", 10, QFont.Bold))
         title_label.setStyleSheet("color: black; background: transparent;")
@@ -43,7 +42,6 @@ class BookAdderBox(QWidget):
         self.adjust_box_size(title_label)
 
     def adjust_box_size(self, title_label):
-        # Получаем размеры текста title и author
         title_metrics = QFontMetrics(title_label.font())
 
         title_width = title_metrics.boundingRect(title_label.text()).width()
@@ -65,7 +63,7 @@ class BookAdderBox(QWidget):
             if files:
                 for file in files:
                     file_name = file.split("/")[-1]
-                    if not dst.find(file_name):
+                    if not os.path.exists(f"storage/{file_name}"):
                         src = os.path.abspath(file)
                         shutil.move(src, dst)
                 self.app.restart_activation()
