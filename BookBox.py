@@ -2,7 +2,7 @@ import os
 import shutil
 
 from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QWidget, QLabel, QVBoxLayout, QMessageBox
+from PyQt5.QtWidgets import QWidget, QLabel, QVBoxLayout, QMessageBox, QDialog, QInputDialog, QFileDialog
 from PyQt5.QtGui import QPixmap, QFont, QPainter, QPen, QFontMetrics, QIcon
 from PyQt5.QtCore import Qt, QRect
 
@@ -24,11 +24,11 @@ class BookBox(QWidget):
         self.max_width = 300
         self.init_ui()
 
-
     def open_action_activation(self):
         if self.reader is not None:
             execute_message_box("Внимание!" "Открытие новой книги невозможно, пока старая не закрыта!")
-        else: self.parse_book()
+        else:
+            self.parse_book()
 
     def parse_book(self):
         if self.book.file_path.endswith(".fb2"):
@@ -48,6 +48,15 @@ class BookBox(QWidget):
             self.bookRedactionWidget.deleteLater()
         self.bookRedactionWidget = BookRedactionWidget(self.book, self.app)
         self.bookRedactionWidget.show()
+
+    def copy_book_action_activation(self):
+        dst = QFileDialog.getExistingDirectory(self, f"Выберите папку для копирования '{self.book.title}'")
+
+        try:
+            shutil.copy(self.book.file_path, dst)
+            execute_message_box("Внимание!", f"'{self.book.title}' была успешно скопирована!")
+        except Exception:
+            execute_message_box("Внимание!", "Неизвестная ошибка!")
 
     def delete_action_activation(self):
         if self.asking is not None:
@@ -69,7 +78,8 @@ class BookBox(QWidget):
         self.group_collections_menu.clear()
         for collection in self.app.collection_list:
             collection_add_action = QtWidgets.QAction(collection, self)
-            collection_add_action.triggered.connect(lambda checked, collection_name=collection: self.add_to_collection(collection_name))
+            collection_add_action.triggered.connect(
+                lambda checked, collection_name=collection: self.add_to_collection(collection_name))
             self.group_collections_menu.addAction(collection_add_action)
         self.contextMenu.exec_(event.globalPos())
 
@@ -147,6 +157,9 @@ class BookBox(QWidget):
 
         self.group_collections_menu = self.contextMenu.addMenu("Добавить в...")
 
+        self.copyBookAction = QtWidgets.QAction("Копировать книгу в...", self)
+        self.contextMenu.addAction(self.copyBookAction)
+
         self.redactAction = QtWidgets.QAction("Редактировать информацию", self)
         self.contextMenu.addAction(self.redactAction)
 
@@ -156,6 +169,7 @@ class BookBox(QWidget):
         self.redactAction.triggered.connect(self.redact_action_activation)
         self.deleteAction.triggered.connect(self.delete_action_activation)
         self.openAction.triggered.connect(self.open_action_activation)
+        self.copyBookAction.triggered.connect(self.copy_book_action_activation)
 
     def adjust_box_size(self, title_label, author_label):
         title_metrics = QFontMetrics(title_label.font())

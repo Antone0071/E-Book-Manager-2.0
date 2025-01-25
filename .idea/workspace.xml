@@ -4,10 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ec7f1f27-788a-49e1-b230-d099a707313c" name="Changes" comment="0.1:&#10;Added function of adding new books in library&#10;Added context menu:&#10;   Added function of file redacted&#10;   Added function of book deleting&#10;Added new book parameter - genre">
-      <change afterPath="$PROJECT_DIR$/CollectionAdder.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/EpubReader.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Fb2Reader.py" afterDir="false" />
+    <list default="true" id="ec7f1f27-788a-49e1-b230-d099a707313c" name="Changes" comment="0.2:&#10;Updated book editing menu - now you can change the book cover">
       <change afterPath="$PROJECT_DIR$/collections/Steven King Collection/Blok, Aleksandr - Stihi o Prekrasnoj Dame.epub" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/collections/Steven King Collection/Chehov, Anton - Chajka.epub" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/collections/Steven King Collection/KKing_Romany-Stivena-Kinga_2_Zhrebiy-Salema.357208.fb2.epub" afterDir="false" />
@@ -26,7 +23,7 @@
       <change afterPath="$PROJECT_DIR$/collections/Чехов/Chehov, Anton - Tri sestry.epub" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/collections/Чехов/Chehov, Anton - Vishnevyi sad.epub" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/collections/Чехов/Chekhov, Anton - Kashtanka.epub" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/icons/new-collection-adder.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/collections/Чехов/Dostoevskij, Fedor - Idiot.epub" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/storage/Blok, Aleksandr - Stihi o Prekrasnoj Dame.epub" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/storage/Chehov, Anton - Chajka.epub" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/storage/Chehov, Anton - Tri sestry.epub" afterDir="false" />
@@ -35,13 +32,9 @@
       <change afterPath="$PROJECT_DIR$/storage/Gosudar.fb2" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/storage/Kelskie_mifi.fb2" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Book.py" beforeDir="false" afterPath="$PROJECT_DIR$/Book.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BookAdderBox.py" beforeDir="false" afterPath="$PROJECT_DIR$/BookAdderBox.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/BookBox.py" beforeDir="false" afterPath="$PROJECT_DIR$/BookBox.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BookRedactionWidget.py" beforeDir="false" afterPath="$PROJECT_DIR$/BookRedactionWidget.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CollectionAdder.py" beforeDir="false" afterPath="$PROJECT_DIR$/CollectionAdder.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/FullscreenApp.py" beforeDir="false" afterPath="$PROJECT_DIR$/FullscreenApp.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Reader.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SettingsWindow.py" beforeDir="false" afterPath="$PROJECT_DIR$/SettingsWindow.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -222,7 +215,15 @@
       <option name="project" value="LOCAL" />
       <updated>1736084299545</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="0.2:&#10;Updated book editing menu - now you can change the book cover">
+      <option name="closed" value="true" />
+      <created>1737277299062</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1737277299062</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -252,7 +253,8 @@
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <MESSAGE value="0.01" />
     <MESSAGE value="0.1:&#10;Added function of adding new books in library&#10;Added context menu:&#10;   Added function of file redacted&#10;   Added function of book deleting&#10;Added new book parameter - genre" />
-    <option name="LAST_COMMIT_MESSAGE" value="0.1:&#10;Added function of adding new books in library&#10;Added context menu:&#10;   Added function of file redacted&#10;   Added function of book deleting&#10;Added new book parameter - genre" />
+    <MESSAGE value="0.2:&#10;Updated book editing menu - now you can change the book cover" />
+    <option name="LAST_COMMIT_MESSAGE" value="0.2:&#10;Updated book editing menu - now you can change the book cover" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

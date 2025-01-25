@@ -3,10 +3,10 @@ import shutil
 from pathlib import Path
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QPushButton, QGridLayout, QLabel, QScrollArea, QHBoxLayout,
                              QTreeWidget,
-                             QTreeWidgetItem, QMessageBox, QStackedWidget, QCheckBox)
+                             QTreeWidgetItem, QMessageBox, QStackedWidget, QCheckBox, QFileDialog)
 from PyQt5.QtGui import QPixmap, QFont, QIcon
 from PyQt5.QtCore import Qt
-from BookBox import BookBox
+from BookBox import BookBox, execute_message_box
 from Book import Book
 from BookAdderBox import BookAdderBox
 from CollectionAdder import CollectionAdder
@@ -76,9 +76,15 @@ class FullScreenApp(QWidget):
         restart_button.setIcon(QIcon("icons/restart.png"))
         restart_button.clicked.connect(self.restart_activation)
 
+        copy_collection_button = QPushButton()
+        copy_collection_button.setIcon(QIcon("icons/new-collection-adder.png"))
+        copy_collection_button.setText("Копировать коллекцию")
+        copy_collection_button.clicked.connect(self.copy_collection_action)
+
         sideboard = QVBoxLayout()
         down_sideboard = QHBoxLayout()
         sideboard.addWidget(self.sidebar)
+        sideboard.addWidget(copy_collection_button)
         sideboard.addWidget(collection_adder_button)
         down_sideboard.addWidget(settings_button)
         down_sideboard.addWidget(restart_button)
@@ -86,6 +92,32 @@ class FullScreenApp(QWidget):
 
         main_layout.addLayout(sideboard)
         main_layout.addWidget(self.pages)
+
+    def copy_collection_action(self):
+        """Обработка нажатия кнопки 'Копировать коллекцию'."""
+
+        # Проверяем активную страницу
+        current_index = self.pages.currentIndex()
+        for collection_name, page_index in self.collection_pages.items():
+            if page_index == current_index:
+                source_dir = os.path.join("collections", collection_name)
+                break
+        else:
+            execute_message_box("Внимание!", "Активная страница не является коллекцией!")
+            return
+
+        # Открываем диалог выбора папки
+        target_dir = QFileDialog.getExistingDirectory(self, "Выберите папку для копирования коллекции")
+
+        if not target_dir:
+            return  # Пользователь отменил выбор
+
+        try:
+            # Копируем коллекцию
+            shutil.copytree(source_dir, os.path.join(target_dir, collection_name))
+            execute_message_box("Успех", f"Коллекция '{collection_name}' успешно скопирована")
+        except Exception as e:
+            execute_message_box("Ошибка!", f"Не удалось скопировать коллекцию: {str(e)}")
 
     def get_books(self):
         if not self.book_list_cache:

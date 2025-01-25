@@ -66,7 +66,7 @@ class CollectionAdder(QWidget):
             book_box.flag = True
             self.selected_books.append(book_box.book)
             book_box.setStyleSheet("""
-                border: 2px solid blue;
+                border: 2px solid black;
                 border-radius: 10px;
             """)
 
