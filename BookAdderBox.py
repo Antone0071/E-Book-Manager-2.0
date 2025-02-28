@@ -1,6 +1,5 @@
 import os
 import shutil
-from pathlib import Path
 
 from PyQt5.QtCore import QRect, Qt
 from PyQt5.QtGui import QPainter, QPen, QFontMetrics, QFont, QPixmap
@@ -33,7 +32,7 @@ class BookAdderBox(QWidget):
         cover_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(cover_label)
 
-        title_label = QLabel("Добавить ещё книг", self)
+        title_label = QLabel("Добавить больше книг", self)
         title_label.setFont(QFont("Arial", 10, QFont.Bold))
         title_label.setStyleSheet("color: black; background: transparent;")
         title_label.setAlignment(Qt.AlignCenter)

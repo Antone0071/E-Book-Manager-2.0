@@ -24,7 +24,7 @@ class BookRedactionWidget(QtWidgets.QListWidget):
         self.app = app
         self.path = self.book.file_path
         self.original_cover = self.book.cover
-        self.move(700, 200)
+        self.move(565, 280)
         self.setFixedSize(800, 400)
         self.setWindowTitle("Редактирование " + book.title)
         self.setWindowIcon(QIcon("icons/default-book-cover.png"))
@@ -141,13 +141,17 @@ class BookRedactionWidget(QtWidgets.QListWidget):
 
             title_element = root.find(".//dc:title", ns)
             author_element = root.find(".//dc:creator", ns)
-            genre_element = root.find(".//dc:subject", ns)
 
             if title_element is not None:
                 title_element.text = self.title_line_edit.text()
             if author_element is not None:
                 author_element.text = self.author_line_edit.text()
-            if genre_element is not None:
+            metadata = root.find(".//opf:metadata", ns)
+            if metadata is not None:
+                genre_element = metadata.find(".//dc:subject", ns)
+                if genre_element is None:
+                    genre_element = ET.Element("{http://purl.org/dc/elements/1.1/}subject")
+                    metadata.append(genre_element)
                 genre_element.text = self.genre_line_edit.text()
 
             tree.write(opf_path, encoding="utf-8", xml_declaration=True)
@@ -189,9 +193,13 @@ class BookRedactionWidget(QtWidgets.QListWidget):
         if title is not None:
             title.text = self.title_line_edit.text()
 
-        genre = root.find(".//fb2:genre", ns)
-        if genre is not None:
-            genre.text = self.genre_line_edit.text()
+        description = root.find(".//fb2:description", ns)
+        if description is not None:
+            genre_element = description.find(".//fb2:genre", ns)
+            if genre_element is None:
+                genre_element = ET.Element("{http://www.gribuser.ru/xml/fictionbook/2.0}genre")
+                description.insert(0, genre_element)
+            genre_element.text = self.genre_line_edit.text()
 
         cover_page = root.find(".//fb2:coverpage/fb2:image", namespaces=ns)
         if cover_page is not None and self.cover_data is not None:
@@ -224,7 +232,7 @@ class RedactionBookBox(QWidget):
             )
 
             if file:
-                cover_path = os.path.abspath(file[0])  # Получаем путь к первому файлу из списка
+                cover_path = os.path.abspath(file[0])
                 if os.path.exists(cover_path):
                     with open(cover_path, "rb") as img:
                         cover_data = img.read()
@@ -234,7 +242,7 @@ class RedactionBookBox(QWidget):
                     self.update_cover()
 
     def update_cover(self):
-        # Обновляем виджет обложки
+        """Обновляем виджет обложки"""
         cover_label = self.findChild(QLabel)
 
         if self.book.flag:

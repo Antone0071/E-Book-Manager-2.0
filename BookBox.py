@@ -26,12 +26,12 @@ class BookBox(QWidget):
 
     def open_action_activation(self):
         if self.reader is not None:
-            execute_message_box("Внимание!" "Открытие новой книги невозможно, пока старая не закрыта!")
+            execute_message_box("Внимание!", "Открытие новой книги невозможно, пока старая не закрыта!")
         else:
             self.parse_book()
 
     def parse_book(self):
-        if self.book.file_path.endswith(".fb2"):
+        if self.book.file_path.endswith(".fb2") and self.reader is None:
             #self.reader = Fb2Reader(self.book.title, self.book.file_path)
             execute_message_box("Внимание!", "Ридер для fb2 формата ещё не реализован! Ждите!")
         elif self.book.file_path.endswith(".epub"):

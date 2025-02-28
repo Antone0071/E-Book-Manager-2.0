@@ -1,11 +1,12 @@
-import os.path
+from PyQt5.QtWidgets import QWidget, QLabel, QVBoxLayout, QScrollArea, QFrame, QHBoxLayout, QLineEdit, QPushButton, \
+    QCheckBox, QMessageBox
+from PyQt5.QtGui import QIcon
+from PyQt5.QtCore import Qt
+
+import os
 import shutil
 
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QGridLayout, QLabel, QFormLayout, QLineEdit, QListWidget, \
-    QScrollArea, QHBoxLayout, QFrame, QDialog, QMessageBox, QCheckBox
-from BookBox import *
+from BookBox import BookBox
 
 
 class CollectionAdder(QWidget):
@@ -15,21 +16,25 @@ class CollectionAdder(QWidget):
         self.app = app
         self.setWindowTitle("Создатель коллекций")
         self.move(650, 200)
-        self.setFixedSize(600, 500)
+        self.setFixedSize(600, 548)
         self.setWindowIcon(QIcon("icons/default-book-cover.png"))
 
         self.selected_books = []
+        self.all_books = []
 
         collection_adder_layout = QVBoxLayout(self)
 
         collection_title_label = QLabel("Название коллекции:")
         self.collection_title_line_edit = QLineEdit()
 
+        self.search_line_edit = QLineEdit(self)
+        self.search_line_edit.setPlaceholderText("Сортировка...")
+        self.search_line_edit.textChanged.connect(self.filter_books)
+
         collection_adder_button = QPushButton("Принять")
         collection_adder_button.clicked.connect(self.accept_collection)
 
-        self.copy_check_box = QCheckBox()
-        self.copy_check_box.setText("Книги будут полностью перемещены")
+        self.copy_check_box = QCheckBox("Книги будут полностью перемещены")
         self.copy_check_box.setCheckState(Qt.Checked)
 
         scroll_area = QScrollArea()
@@ -44,6 +49,7 @@ class CollectionAdder(QWidget):
 
         collection_adder_layout.addWidget(collection_title_label)
         collection_adder_layout.addWidget(self.collection_title_line_edit)
+        collection_adder_layout.addWidget(self.search_line_edit)  # Поле поиска
         collection_adder_layout.addWidget(scroll_area)
         collection_adder_layout.addWidget(self.copy_check_box)
         collection_adder_layout.addWidget(collection_adder_button)
@@ -55,6 +61,7 @@ class CollectionAdder(QWidget):
             book_box = BookBox(self.app, book)
             book_box.mousePressEvent = lambda e, b=book_box: self.toggle_selection(b)
             self.books_layout.addWidget(book_box)
+            self.all_books.append(book_box)
 
     def toggle_selection(self, book_box):
         """Выделяет/снимает выделение с книги"""
@@ -69,6 +76,17 @@ class CollectionAdder(QWidget):
                 border: 2px solid black;
                 border-radius: 10px;
             """)
+
+    def filter_books(self):
+        """Фильтрует книги по названию"""
+        search_text = self.search_line_edit.text().strip().lower()
+
+        for book_box in self.all_books:
+            title = book_box.book.title.lower()
+            if search_text in title or not search_text:
+                book_box.show()
+            else:
+                book_box.hide()
 
     def accept_collection(self):
         """Обработка выбранных книг"""
@@ -92,6 +110,7 @@ class CollectionAdder(QWidget):
             if self.copy_check_box.isChecked():
                 for book in self.selected_books:
                     shutil.move(book.file_path, f"collections/{dir_name}")
+                    self.app.restart_activation()
             else:
                 for book in self.selected_books:
                     shutil.copy(book.file_path, f"collections/{dir_name}")

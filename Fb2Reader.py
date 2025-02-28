@@ -1,12 +1,14 @@
+import base64
 import os
 import shutil
-import base64
 from io import BytesIO
-from chardet import UniversalDetector
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QScrollArea, QLabel, QMessageBox
-from PyQt5.QtGui import QPixmap, QIcon
-from PyQt5.QtCore import Qt
+
 from PIL import Image
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QPixmap, QIcon
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QScrollArea, QLabel, QMessageBox
+from chardet import UniversalDetector
+
 
 class Fb2Reader(QWidget):
 
@@ -114,7 +116,8 @@ class Fb2Reader(QWidget):
 
         if self.cover_image_path:
             cover_label = QLabel(self)
-            pixmap = QPixmap(self.cover_image_path).scaled(self.width(), self.height() // 2, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+            pixmap = QPixmap(self.cover_image_path).scaled(self.width(), self.height() // 2, Qt.KeepAspectRatio,
+                                                           Qt.SmoothTransformation)
             cover_label.setPixmap(pixmap)
             cover_label.setAlignment(Qt.AlignCenter)
             content_layout.addWidget(cover_label)

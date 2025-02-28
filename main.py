@@ -1,7 +1,8 @@
 import sys
+
 from PyQt5.QtWidgets import QApplication
+
 from FullscreenApp import FullScreenApp
-import qdarktheme
 
 
 def display_tab(self, index):

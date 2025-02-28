@@ -1,42 +1,43 @@
 import os
 import shutil
 from pathlib import Path
-from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QPushButton, QGridLayout, QLabel, QScrollArea, QHBoxLayout,
+
+from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QPushButton, QGridLayout, QScrollArea, QHBoxLayout,
                              QTreeWidget,
-                             QTreeWidgetItem, QMessageBox, QStackedWidget, QCheckBox, QFileDialog)
-from PyQt5.QtGui import QPixmap, QFont, QIcon
-from PyQt5.QtCore import Qt
-from BookBox import BookBox, execute_message_box
+                             QTreeWidgetItem, QStackedWidget, QFileDialog, QMessageBox)
+
 from Book import Book
 from BookAdderBox import BookAdderBox
+from BookBox import BookBox, execute_message_box
 from CollectionAdder import CollectionAdder
 from SettingsWindow import SettingsWindow
 
 
-def list_creation(dir_path, flag=True):
-    """Создаем список книг или коллекций."""
-    listed = []
-    if not os.path.isdir(dir_path):
-        os.mkdir(dir_path)
-    if flag:
-        for item in os.listdir(dir_path):
-            item_path = os.path.join(dir_path, item)
-            if item_path.endswith(".epub") or item_path.endswith(".fb2"):
-                book = Book(item_path)
-                listed.append(book)
-    else:
-        for item in Path(dir_path).iterdir():
-            if item.is_dir():
-                listed.append(item.name)
-    return listed
-
-
 class FullScreenApp(QWidget):
+
+    def list_creation(self, dir_path, flag=True):
+        """Создаем список книг или коллекций."""
+        listed = []
+        if not os.path.isdir(dir_path):
+            os.mkdir(dir_path)
+        if flag:
+            for item in os.listdir(dir_path):
+                item_path = os.path.join(dir_path, item)
+                if item_path.endswith(".epub") or item_path.endswith(".fb2"):
+                    book = Book(item_path)
+                    listed.append(book)
+        else:
+            for item in Path(dir_path).iterdir():
+                if item.is_dir():
+                    listed.append(item.name)
+        return listed
+
     def __init__(self):
         super().__init__()
         self.collection_adder = None
         self.setWindowTitle("Book Library")
-        self.setGeometry(250, 100, 1405, 890)
+        self.setGeometry(200, 100, 1550, 890)
         self.setWindowIcon(QIcon("icons/default-book-cover.png"))
         self.columns = 6
         self.book_list_cache = []
@@ -46,7 +47,7 @@ class FullScreenApp(QWidget):
         self.pages = QStackedWidget()
 
         self.book_list = self.get_books()
-        self.collection_list = list_creation("collections", flag=False)
+        self.collection_list = self.list_creation("collections", flag=False)
 
         main_layout = QHBoxLayout(self)
         self.setup_sidebar()
@@ -66,6 +67,7 @@ class FullScreenApp(QWidget):
 
         collection_adder_button = QPushButton()
         collection_adder_button.setIcon(QIcon("icons/new-collection-adder.png"))
+        collection_adder_button.setText("Создать коллекцию")
         collection_adder_button.clicked.connect(self.collection_adder_activation)
 
         settings_button = QPushButton()
@@ -81,17 +83,43 @@ class FullScreenApp(QWidget):
         copy_collection_button.setText("Копировать коллекцию")
         copy_collection_button.clicked.connect(self.copy_collection_action)
 
+        kill_collection_button = QPushButton()
+        kill_collection_button.setIcon(QIcon("icons/minus.png"))
+        kill_collection_button.setText("Удалить коллекцию")
+        kill_collection_button.clicked.connect(self.kill_collection_action)
+
         sideboard = QVBoxLayout()
         down_sideboard = QHBoxLayout()
         sideboard.addWidget(self.sidebar)
-        sideboard.addWidget(copy_collection_button)
         sideboard.addWidget(collection_adder_button)
+        sideboard.addWidget(copy_collection_button)
+        sideboard.addWidget(kill_collection_button)
         down_sideboard.addWidget(settings_button)
         down_sideboard.addWidget(restart_button)
         sideboard.addLayout(down_sideboard)
 
         main_layout.addLayout(sideboard)
         main_layout.addWidget(self.pages)
+
+    def kill_collection_action(self):
+        # Проверяем активную страницу
+        current_index = self.pages.currentIndex()
+        for collection_name, page_index in self.collection_pages.items():
+            if page_index == current_index:
+                source_dir = os.path.join("collections", collection_name)
+                break
+        else:
+            execute_message_box("Внимание!", "Активная страница не является коллекцией!")
+            return
+
+        try:
+            if QMessageBox.question(self, "", f"Вы уверены, что хотите удалить коллекцию '{collection_name}'?", QMessageBox.Yes | QMessageBox.No):
+                shutil.rmtree(source_dir)
+                self.restart_activation()
+                self.pages.setCurrentWidget(self.pages.widget(0))
+
+        except Exception as e:
+            execute_message_box("Ошибка!", f"Не удалось удалить коллекцию: {str(e)}")
 
     def copy_collection_action(self):
         """Обработка нажатия кнопки 'Копировать коллекцию'."""
@@ -111,7 +139,6 @@ class FullScreenApp(QWidget):
 
         if not target_dir:
             return  # Пользователь отменил выбор
-
         try:
             # Копируем коллекцию
             shutil.copytree(source_dir, os.path.join(target_dir, collection_name))
@@ -121,7 +148,7 @@ class FullScreenApp(QWidget):
 
     def get_books(self):
         if not self.book_list_cache:
-            self.book_list_cache = list_creation("storage")
+            self.book_list_cache = self.list_creation("storage")
         return self.book_list_cache
 
     def setup_sidebar(self):
@@ -134,6 +161,8 @@ class FullScreenApp(QWidget):
         self.sidebar.clear()
         library_item = QTreeWidgetItem(["Библиотека"])
         self.sidebar.addTopLevelItem(library_item)
+        genres_item = QTreeWidgetItem(["Жанры"])
+        self.sidebar.addTopLevelItem(genres_item)
         collection_group = QTreeWidgetItem(["Коллекции"])
         for collection in self.collection_list:
             collection_item = QTreeWidgetItem([collection])
@@ -163,7 +192,7 @@ class FullScreenApp(QWidget):
 
         # Добавляем новые книги в коллекцию
         collection_path = os.path.join("collections", collection_name)
-        books = list_creation(collection_path)
+        books = self.list_creation(collection_path)
         cols = self.columns
         row = col = 0
 
@@ -178,7 +207,7 @@ class FullScreenApp(QWidget):
     def restart_activation(self):
         self.book_list_cache = []
         self.book_list = self.get_books()
-        self.collection_list = list_creation("collections", flag=False)
+        self.collection_list = self.list_creation("collections", flag=False)
         self.clear_library_layout()
         self.populate_grid()
         self.populate_sidebar()
